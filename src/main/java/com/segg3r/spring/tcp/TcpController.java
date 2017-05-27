@@ -1,4 +1,4 @@
-package javagrinko.spring.tcp;
+package com.segg3r.spring.tcp;
 
 import org.springframework.stereotype.Component;
 

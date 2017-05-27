@@ -1,4 +1,7 @@
-package javagrinko.spring.tcp;
+package com.segg3r.spring.tcp;
+
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -9,19 +12,22 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class TcpConnection implements Connection {
+public class TcpConnectionImpl implements TcpConnection {
+
+    private static final Logger LOG = LogManager.getLogger(TcpConnectionImpl.class);
+
     private InputStream inputStream;
     private OutputStream outputStream;
     private Socket socket;
     private List<Listener> listeners = new ArrayList<>();
 
-    public TcpConnection(Socket socket) {
+    public TcpConnectionImpl(Socket socket) {
         this.socket = socket;
         try {
             inputStream = socket.getInputStream();
             outputStream = socket.getOutputStream();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new IllegalStateException("Could not initialize TcpConnection for socket " + socket, e);
         }
     }
 
@@ -57,19 +63,19 @@ public class TcpConnection implements Connection {
                     if (count > 0) {
                         byte[] bytes = Arrays.copyOf(buf, count);
                         for (Listener listener : listeners) {
-                            listener.messageReceived(this, bytes);
+                            listener.onMessageReceived(this, bytes);
                         }
                     } else {
                         socket.close();
                         for (Listener listener : listeners) {
-                            listener.disconnected(this);
+                            listener.onClientDisconnected(this);
                         }
                         break;
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOG.warn("Could not receive message from TcpConnection for socket " + socket, e);
                     for (Listener listener : listeners) {
-                        listener.disconnected(this);
+                        listener.onClientDisconnected(this);
                     }
                     break;
                 }
@@ -82,7 +88,7 @@ public class TcpConnection implements Connection {
         try {
             socket.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("Could not close TcpConnection for socket " + socket, e);
         }
     }
 }

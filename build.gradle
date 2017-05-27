@@ -1,93 +1,23 @@
-buildscript {
-    repositories {
-        jcenter()
-        maven { url 'http://repo.spring.io/plugins-release' }
-    }
-    dependencies {
-        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.0'
-        classpath 'org.springframework.build.gradle:propdeps-plugin:0.0.7'
-    }
-}
-
-configure(allprojects) {
-    apply plugin: 'propdeps'
-    apply plugin: 'propdeps-maven'
-    apply plugin: 'propdeps-idea'
-    apply plugin: 'propdeps-eclipse'
-}
-
-group 'javagrinko'
-version '1.0-SNAPSHOT'
-
 apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: "com.jfrog.bintray"
-apply plugin: 'maven-publish'
 
-def props = new Properties()
-def file = new File("version.properties")
-file.withInputStream {
-    stream -> props.load(stream)
-}
-def subver = props.getProperty("subversion", "0") as Integer
-def ver = props.getProperty("version", "0") as Integer
-//props.setProperty("subversion", (subver + 1) as String)
-props.setProperty("subversion", (subver) as String)
-props.store(file.newWriter(), null)
-version = ver + "." + subver
+group 'com.segg3r'
+version '0.1'
 
 repositories {
-    mavenCentral()
-    maven {
-        url "http://dl.bintray.com/javagrinko/maven"
-    }
+    mavenCentral()  
+}
+
+ext {
+	versions = [
+		springBoot: '1.4.6.RELEASE',
+		junit: '4.12'
+	]
 }
 
 dependencies {
-    compile("org.springframework.boot:spring-boot-starter:1.3.2.RELEASE");
-    optional "org.springframework.boot:spring-boot-configuration-processor:1.3.2.RELEASE"
+    compile "org.springframework.boot:spring-boot-starter:${versions.springBoot}"
+    compile "org.springframework.boot:spring-boot-configuration-processor:${versions.springBoot}"
+	
+	testCompile "org.springframework.boot:spring-boot-starter-test:${versions.springBoot}"
+	testCompile "junit:junit:${versions.junit}"
 }
-
-compileJava.dependsOn(processResources)
-
-jar {
-    from('/factories/') {
-        include 'META-INF/spring.factories'
-    }
-}
-
-
-bintray {
-    user = "javagrinko"
-    key = "161e314ff8fea76298fcdeb51c8d939995874d11" //this usually comes from gradle.properties file in ~/.gradle
-    publications = ['mavenJava']
-    dryRun = false
-    publish = true
-    pkg {
-        repo = 'maven'
-        name = 'tcp-spring-boot-starter'
-    }
-}
-
-task sourcesJar(type: Jar, dependsOn: classes) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-            artifact sourcesJar
-        }
-    }
-}
-
-task generateAndPublish{
-    println "Ok"
-}
-
-generateAndPublish.dependsOn 'bintrayUpload'
-generateAndPublish.dependsOn 'generatePomFileForMavenJavaPublication'
-generateAndPublish.dependsOn 'sourcesJar'
-generateAndPublish.dependsOn 'jar'

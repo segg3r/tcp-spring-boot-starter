@@ -1,26 +1,21 @@
-package javagrinko.spring.tcp;
+package com.segg3r.spring.tcp;
 
-import javagrinko.spring.starter.TcpServerProperties;
+import com.segg3r.spring.starter.TcpServerProperties;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
-import org.springframework.stereotype.Component;
 
-@Component
 public class TcpServerAutoStarterApplicationListener implements ApplicationListener<ContextRefreshedEvent> {
 
     @Autowired
     private TcpServerProperties properties;
-
     @Autowired
-    private Server server;
+    private TcpServer server;
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        boolean autoStart = properties.getAutoStart();
-        if (autoStart){
-            server.setPort(properties.getPort());
-            server.start();
-        }
+        server.setPort(properties.getPort());
+        server.start();
     }
+
 }
