@@ -1,12 +1,13 @@
 package com.segg3r.spring.tcp;
 
+import java.io.Serializable;
 import java.net.InetAddress;
 
 public interface TcpConnection {
 
     InetAddress getAddress();
 
-    void send(Object objectToSend);
+    void send(Serializable objectToSend);
 
     void addListener(Listener listener);
 

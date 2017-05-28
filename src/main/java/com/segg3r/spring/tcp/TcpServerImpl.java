@@ -73,7 +73,7 @@ public class TcpServerImpl implements TcpServer, TcpConnection.Listener {
 
     @Override
     public void onMessageReceived(TcpConnection connection, Object message) {
-        LOG.trace("Received new message from " + connection.getAddress().getCanonicalHostName());
+        LOG.trace("Received new message from " + connection.getAddress());
         LOG.trace("Received object: " + message.getClass().getCanonicalName() + ", toString: " + message.toString());
         for (TcpConnection.Listener listener : listeners) {
             listener.onMessageReceived(connection, message);
@@ -82,7 +82,7 @@ public class TcpServerImpl implements TcpServer, TcpConnection.Listener {
 
     @Override
     public void onClientConnected(TcpConnection connection) {
-        LOG.info("Client connected: " + connection.getAddress().getCanonicalHostName() + ".");
+        LOG.info("Client connected: " + connection.getAddress() + ".");
         connections.add(connection);
         LOG.debug("Current connections count: " + connections.size());
         for (TcpConnection.Listener listener : listeners) {
@@ -92,7 +92,7 @@ public class TcpServerImpl implements TcpServer, TcpConnection.Listener {
 
     @Override
     public void onClientDisconnected(TcpConnection connection) {
-        LOG.info("Client disconnected: " + connection.getAddress().getCanonicalHostName() + ".");
+        LOG.info("Client disconnected: " + connection.getAddress() + ".");
         connections.remove(connection);
         LOG.debug("Current connections count: " + connections.size());
         for (TcpConnection.Listener listener : listeners) {

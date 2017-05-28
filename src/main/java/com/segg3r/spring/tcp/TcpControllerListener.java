@@ -1,10 +1,15 @@
 package com.segg3r.spring.tcp;
 
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
 public class TcpControllerListener implements TcpConnection.Listener {
+
+    private static final Logger LOG = LogManager.getLogger(TcpControllerListener.class);
 
     private final Object bean;
     private final List<Method> receiveMethods;
@@ -22,11 +27,11 @@ public class TcpControllerListener implements TcpConnection.Listener {
     public void onMessageReceived(TcpConnection connection, Object message) {
         for (Method receiveMethod : receiveMethods) {
             Class<?> aClass = receiveMethod.getParameterTypes()[1];
-            if (message.getClass().isAssignableFrom(aClass)) {
+            if (aClass.isAssignableFrom(message.getClass())) {
                 try {
                     receiveMethod.invoke(bean, connection, message);
                 } catch (IllegalAccessException | InvocationTargetException e) {
-                    e.printStackTrace();
+                    LOG.error("Could not process received message " + message + " for connection " + connection.getAddress(), e);
                 }
             }
         }
@@ -38,7 +43,7 @@ public class TcpControllerListener implements TcpConnection.Listener {
             try {
                 connectMethod.invoke(bean, connection);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
+                LOG.error("Could not process client connection for connection " + connection.getAddress(), e);
             }
         }
     }
@@ -49,7 +54,7 @@ public class TcpControllerListener implements TcpConnection.Listener {
             try {
                 disconnectMethod.invoke(bean, connection);
             } catch (IllegalAccessException | InvocationTargetException e) {
-                e.printStackTrace();
+                LOG.error("Could not process client disconnect for connection " + connection.getAddress(), e);
             }
         }
     }
